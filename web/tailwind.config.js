@@ -1,34 +1,68 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: ['class'],
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
       colors: {
-        'dark-gray': '#1a1a1a',
-        'darker-gray': '#141414',
-        'user-gray': '#2a2a2a',
-        'light-gray': '#e2e8f0',
-        blue: {
-          600: '#2563eb',
-          700: '#1d4ed8',
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        sepia: {
+          50: '#fcf9f3',
+          100: '#f8f1e4',
+          200: '#f1e2c8',
+          300: '#e6cca3',
+          400: '#d9b27d',
+          500: '#cb955b',
+          600: '#bd7d4a',
+          700: '#9d623f',
+          800: '#7f4f39',
+          900: '#674232',
+          950: '#372118',
         },
       },
-      spacing: {
-        '1%': '1%',
-        '2%': '2%',
-        '3%': '3%',
-        '4%': '4%',
-        '10%': '10%',
-        '20.5%': '20.5%',
-        // Add more percentage values as needed
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-    require('tailwind-scrollbar'),
-  ],
-}
+  plugins: [require('tailwindcss-animate')],
+};
