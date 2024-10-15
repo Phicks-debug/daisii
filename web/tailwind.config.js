@@ -62,6 +62,12 @@ export default {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      padding: {
+        '5p': '5%',   // Adds a padding of 5%
+        '7p': '7%', // Adds a padding of 10%
+        '10p': '10%', // Adds a padding of 15%
+        '2p': '2%', // Adds a padding of 20%
+      },
     },
   },
   plugins: [require('tailwindcss-animate')],

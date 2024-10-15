@@ -5,21 +5,23 @@ class BedrockService:
     def __init__(self, region_name: str):
         self.bedrock_runtime = boto3.client('bedrock-runtime', region_name=region_name)
 
-    async def invoke_model(self, messages):
+    async def invoke_model(self, instruction, messages, max_token, temp, p, k):
         body = json.dumps({
-            "prompt": self._format_messages(messages),
-            "max_tokens_to_sample": 512,
-            "temperature": 0.3,
-            "top_p": 0.9,
-            "top_k": 60,
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": max_token,
+            "system": instruction,
+            "messages": messages,
+            "temperature": temp,
+            "top_p": p,
+            "top_k": k,
+            "stop_sequences": []
         })
 
         response = self.bedrock_runtime.invoke_model_with_response_stream(
             modelId="anthropic.claude-3-haiku-20240307-v1:0",
-            body=body
+            accept="application/json",
+            contentType="application/json",
+            body=body,
         )
         return response['body']
-
-    def _format_messages(self, messages):
-        return "\n\n".join([f"{msg['role']}: {msg['content']}" for msg in messages])
         
