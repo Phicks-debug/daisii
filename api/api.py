@@ -90,7 +90,7 @@ async def chat(request: Request):
             # chat_history.append({"role": "assistant", "content": full_response})
             # await dynamodb_service.save_chat_history(conversation_id, chat_history)
 
-        return StreamingResponse(generate(), media_type="text/event-stream")
+        return StreamingResponse(generate(), media_type="text/markdown")
     # except Exception as e:
     #     logging.error(f"Error in chat endpoint: {str(e)}")
     #     raise HTTPException(status_code=500, detail="Internal server error")
