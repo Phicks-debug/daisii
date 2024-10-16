@@ -71,8 +71,6 @@ async def chat(request: Request):
         memory.append(data)
         stream = await bedrock_service.invoke_model(instruction, memory, 512, 0, 0.9, 0)
         
-        print(memory)
-        
         async def generate():
             full_response = ""
             try:
