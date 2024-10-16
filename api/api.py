@@ -56,7 +56,7 @@ async def create_table(conversation_id: str):
 
 @app.post("/chat")
 async def chat(request: Request):
-    # try:
+    try:
         # # Generate a unique conversation ID (you might want to implement a better way to manage this)
         # conversation_id = "temp_conversation_id"
 
@@ -83,7 +83,7 @@ async def chat(request: Request):
                             full_response+=text_chunk
             except Exception as e:
                 logging.error(f"Error while streaming response: {str(e)}")
-                raise HTTPException(status_code=500, detail="Error while streaming response")
+                return HTTPException(status_code=500, detail="Error while streaming response")
             
             # Save the updated chat history
             memory.append({"role": "assistant", "content": full_response})
@@ -91,9 +91,9 @@ async def chat(request: Request):
             # await dynamodb_service.save_chat_history(conversation_id, chat_history)
 
         return StreamingResponse(generate(), media_type="text/markdown")
-    # except Exception as e:
-    #     logging.error(f"Error in chat endpoint: {str(e)}")
-    #     raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as e:
+        logging.error(f"Error in chat endpoint: {str(e)}")
+        return HTTPException(status_code=500, detail="Internal server error")
 
 if __name__ == "__main__":
     import uvicorn
