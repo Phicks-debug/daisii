@@ -71,6 +71,8 @@ async def chat(request: Request):
         memory.append(data)
         stream = await bedrock_service.invoke_model(instruction, memory, 512, 0, 0.9, 0)
         
+        print(memory)
+        
         async def generate():
             full_response = ""
             try:
@@ -83,7 +85,7 @@ async def chat(request: Request):
                             full_response+=text_chunk
             except Exception as e:
                 logging.error(f"Error while streaming response: {str(e)}")
-                return HTTPException(status_code=500, detail="Error while streaming response")
+                raise HTTPException(status_code=500, detail="Error while streaming response")
             
             # Save the updated chat history
             memory.append({"role": "assistant", "content": full_response})
@@ -93,7 +95,7 @@ async def chat(request: Request):
         return StreamingResponse(generate(), media_type="text/markdown")
     except Exception as e:
         logging.error(f"Error in chat endpoint: {str(e)}")
-        return HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 if __name__ == "__main__":
     import uvicorn
