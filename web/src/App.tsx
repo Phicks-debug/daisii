@@ -90,7 +90,7 @@ function App() {
   const showHelp = () => {
     toast({
       title: "Help",
-      description: "This is a AI chat application. Type your message and hit enter to chat with the Daisii.",
+      description: "This is a AI chat application. Type your message and hit enter to chat with Daisii.",
     });
   };
 
@@ -140,22 +140,49 @@ function App() {
         {/* Chat display area */}
         <div
           ref={scrollAreaRef}
-          className="flex-grow w-full max-w-2xl mx-auto p-2 overflow-y-auto custom-scrollbar"
+          className="flex-grow w-full max-w-2xl mx-auto p-2 overflow-y-auto custom-scrollbar chat-container"
         >
           {messages.map((message, index) => (
             <div
               key={index}
               className={`flex items-start mb-4 ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`flex items-start space-x-2 ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+              <div className={`flex items-start space-x-2 max-w-[95%] ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                 <div
-                  className={`p-3 rounded-lg ${
-                    message.isUser ? 'bg-sepia-300 dark:bg-sepia-700 ml-auto' : 'bg-sepia-200 dark:bg-sepia-600 mr-auto'
-                  }`}
+                  className={`p-3 rounded-lg w-full ${
+                    message.isUser ? 'bg-sepia-300 dark:bg-sepia-700' : 'bg-sepia-200 dark:bg-sepia-600'
+                  } prose dark:prose-invert`}
                 >
-                  <ReactMarkdown>
-                    {message.text}
-                  </ReactMarkdown>
+                  <div className='
+                    w-full overflow-hidden
+                    [&>*]:w-full [&>*]:break-words
+                    [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:pl-4
+                    [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:pl-4
+                    [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:mb-4 [&>h1]:mt-2
+                    [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-3 [&>h2]:mt-2
+                    [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-2 [&>h3]:mt-2
+                    [&>p]:mb-2
+                    [&>blockquote]:border-l-4 [&>blockquote]:border-sepia-500 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-2
+                    [&>pre]:relative [&>pre]:bg-sepia-700/10 [&>pre]:p-2 [&>pre]:rounded [&>pre]:overflow-visible
+                    [&>pre>code]:block [&>pre>code]:overflow-x-auto 
+                    [&>pre>code]:scrollbar [&>pre>code]:scrollbar-w-2 [&>pre>code]:scrollbar-h-2
+                    [&>pre>code]:scrollbar-thumb-[#D2B48C] hover:[&>pre>code]:scrollbar-thumb-[#B8860B]
+                    [&>pre>code]:scrollbar-track-transparent hover:[&>pre>code]:scrollbar-track-sepia-200/20
+                    [&>pre>code]:hover:scrollbar-thumb-[#B8860B]
+                    [&>code]:bg-sepia-700/10 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded
+                    [&>a]:text-blue-600 [&>a]:underline [&>a]:hover:text-blue-800
+                    [&>hr]:my-4 [&>hr]:border-sepia-300
+                    [&>table]:border-collapse [&>table]:w-full
+                    [&>table>thead>tr>th]:border [&>table>thead>tr>th]:border-sepia-300 [&>table>thead>tr>th]:p-2
+                    [&>table>tbody>tr>td]:border [&>table>tbody>tr>td]:border-sepia-300 [&>table>tbody>tr>td]:p-2
+                    [&>*>strong]:font-bold
+                    [&>*>em]:italic
+                    [&>*>del]:line-through
+                  '>
+                    <ReactMarkdown>
+                      {message.text}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
             </div>
