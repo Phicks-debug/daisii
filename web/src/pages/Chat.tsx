@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Send, HelpCircle, RefreshCw, Upload, LogOut } from "lucide-react"
+import { Send, HelpCircle, RefreshCw, Upload, LogOut, Copy, Check } from "lucide-react"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -14,6 +14,65 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
+
+
+const CodeBlock = ({ children }: { children: string }) => {
+    const [isCopied, setIsCopied] = useState(false);
+    const { toast } = useToast();
+
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(children);
+            setIsCopied(true);
+            toast({
+                title: "Copied!",
+                description: "Code copied to clipboard",
+            });
+            setTimeout(() => setIsCopied(false), 2000);
+        } catch (err) {
+            toast({
+                title: "Failed to copy",
+                description: "Please try again",
+                variant: "destructive",
+            });
+        }
+    };
+
+    return (
+        <div className="relative group">
+            <Button
+                size="icon"
+                variant="outline"
+                className="absolute right-2 top-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity bg-sepia-200/80 dark:bg-sepia-700/80 hover:bg-sepia-300 dark:hover:bg-sepia-600"
+                onClick={handleCopy}
+            >
+                <AnimatePresence mode="wait" initial={false}>
+                    {isCopied ? (
+                        <motion.div
+                            key="check"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0 }}
+                            className="h-4 w-4 text-green-500"
+                        >
+                            <Check className="h-4 w-4" />
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="copy"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0 }}
+                        >
+                            <Copy className="h-4 w-4" />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </Button>
+            <code>{children}</code>
+        </div>
+    );
+};
 
 
 function App() {
@@ -281,7 +340,12 @@ function App() {
                                                 [&>*>em]:italic
                                                 [&>*>del]:line-through
                                             '>
-                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                <ReactMarkdown
+                                                    remarkPlugins={[remarkGfm]}
+                                                    components={{
+                                                        code: ({ children }) => <CodeBlock>{children as string}</CodeBlock>,
+                                                    }}
+                                                >
                                                     {message.text}
                                                 </ReactMarkdown>
                                             </div>
