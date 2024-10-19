@@ -329,7 +329,6 @@ function App() {
                                                 [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-2 [&>h3]:mt-2
                                                 [&>p]:mb-0
                                                 [&>blockquote]:border-l-4 [&>blockquote]:border-sepia-500 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-2
-                                                
                                                 [&>table]:min-w-full [&>table]:border-collapse [&>table]:my-4
                                                 [&>table]:font-mono [&>table]:relative
                                                 [&>table>thead]:bg-sepia-200/50 dark:[&>table>thead]:bg-sepia-600/30
