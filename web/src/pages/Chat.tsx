@@ -16,6 +16,14 @@ import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
+// Create a Message Interface
+interface Message {
+    text: string;
+    isUser: boolean;
+    botType?: 'Daisii' | 'Claude' | 'Titan';
+}
+
+
 // Custom Code block
 const CodeBlock = ({ children }: { children: ReactElement }) => {
     const [isCopied, setIsCopied] = useState(false);
@@ -106,7 +114,8 @@ const modelStyles = {
             inputArea: 'bg-sepia-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-sepia-500',
             attachButton: 'bg-sepia-400 hover:bg-sepia-500',
             button: 'bg-sepia-500 hover:bg-sepia-600',
-        }
+        },
+        font: 'font-daisii',
     },
     Claude: {
         header: {
@@ -124,7 +133,8 @@ const modelStyles = {
             inputArea: 'bg-sepia-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-sepia-500',
             attachButton: 'bg-sepia-400 hover:bg-sepia-500',
             button: 'bg-sepia-500 hover:bg-sepia-600',
-        }
+        },
+        font: 'font-claude',
     },
     Titan: {
         header: {
@@ -142,13 +152,14 @@ const modelStyles = {
             inputArea: 'bg-sepia-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-sepia-500',
             attachButton: 'bg-sepia-400 hover:bg-sepia-500',
             button: 'bg-sepia-500 hover:bg-sepia-600',
-        }
+        },
+        font: 'font-titan',
     }
 };
 
 
 function App() {
-    const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [isStreaming, setIsStreaming] = useState(false)
     const [input, setInput] = useState('');
     const [isLoaded, setIsLoaded] = useState(false);
@@ -159,6 +170,7 @@ function App() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
     const navigate = useNavigate();
+    const getCurrentModelStyle = () => modelStyles[selectedModel as keyof typeof modelStyles];
 
     // Save selected model to localStorage whenever it changes
     useEffect(() => {
@@ -200,7 +212,11 @@ function App() {
 
         if (input.trim()) {
             // Add user's input to the message list
-            setMessages(prevMessages => [...prevMessages, { text: input, isUser: true }]);
+            setMessages(prevMessages => [...prevMessages, {
+                text: input,
+                isUser: true
+            }]);
+
             const userInput = input;
             setInput('');
 
@@ -230,7 +246,11 @@ function App() {
                     let fullResponse = '';
 
                     // Add an initial empty AI response
-                    setMessages(prevMessages => [...prevMessages, { text: '', isUser: false }]);
+                    setMessages(prevMessages => [...prevMessages, {
+                        text: '',
+                        isUser: false,
+                        botType: selectedModel as 'Daisii' | 'Claude' | 'Titan'
+                    }]);
 
                     while (true) {
                         const { value, done } = await reader.read();
@@ -242,7 +262,11 @@ function App() {
                         // Update only the last message (AI's response)
                         setMessages(prevMessages => [
                             ...prevMessages.slice(0, -1),
-                            { text: fullResponse, isUser: false }
+                            {
+                                text: fullResponse,
+                                isUser: false,
+                                botType: selectedModel as 'Daisii' | 'Claude' | 'Titan'
+                            }
                         ]);
                     }
                 }
@@ -340,9 +364,6 @@ function App() {
     };
 
 
-    const getCurrentModelStyle = () => modelStyles[selectedModel as keyof typeof modelStyles];
-
-
     return (
         <div className="fixed inset-0 overflow-x-hidden main-scrollbar">
             <motion.div
@@ -434,10 +455,10 @@ function App() {
                                         <div
                                             className={`p-3 rounded-lg w-full ${message.isUser
                                                 ? getCurrentModelStyle().chatContainer.userBg
-                                                : getCurrentModelStyle().chatContainer.botBg
+                                                : `${modelStyles[message.botType!].chatContainer.botBg}`
                                                 } prose dark:prose-invert`}
                                         >
-                                            <div className='
+                                            <div className={`
                                                 w-full overflow-hidden table-style
                                                 [&>*]:w-full [&>*]:break-words
                                                 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:pl-4
@@ -463,7 +484,8 @@ function App() {
                                                 [&>*>strong]:font-bold
                                                 [&>*>em]:italic
                                                 [&>*>del]:line-through
-                                            '>
+                                                ${message.isUser ? '' : modelStyles[message.botType!].font}
+                                            `}>
                                                 <ReactMarkdown
                                                     remarkPlugins={[remarkGfm]}
                                                     components={{
@@ -529,7 +551,7 @@ function App() {
                 </main>
 
                 {/* Small footer for disclaimer of Daisii */}
-                <motion.footer
+                < motion.footer
                     className={`p-3 flex justify-center text-sm ${getCurrentModelStyle().header.text}`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -540,7 +562,7 @@ function App() {
 
                 <Toaster />
             </motion.div>
-        </div>
+        </div >
     );
 }
 
