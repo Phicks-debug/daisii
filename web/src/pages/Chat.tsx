@@ -16,6 +16,7 @@ import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
+// Custom Code block
 const CodeBlock = ({ children }: { children: ReactElement }) => {
     const [isCopied, setIsCopied] = useState(false);
     const { toast } = useToast();
@@ -87,16 +88,66 @@ const CodeBlock = ({ children }: { children: ReactElement }) => {
 };
 
 
+// Define style based on Model
+const modelStyles = {
+    Daisii: {
+        header: {
+            background: 'bg-gradient-to-r from-sepia-700 to-sepia-800',
+            text: 'text-sepia-100',
+            hover: 'hover:bg-sepia-600/50'
+        },
+        chatContainer: {
+            userBg: 'bg-sepia-300 dark:bg-sepia-700',
+            botBg: 'bg-sepia-200 dark:bg-sepia-600',
+            gradient: 'bg-gradient-to-br from-sepia-100 to-sepia-200 dark:from-sepia-800 dark:to-sepia-900'
+        }
+    },
+    Claude: {
+        header: {
+            background: 'bg-gradient-to-r from-purple-700 to-purple-900',
+            text: 'text-purple-100',
+            hover: 'hover:bg-purple-600/50'
+        },
+        chatContainer: {
+            userBg: 'bg-purple-200 dark:bg-purple-700',
+            botBg: 'bg-purple-100 dark:bg-purple-800',
+            gradient: 'bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-950'
+        }
+    },
+    Titan: {
+        header: {
+            background: 'bg-gradient-to-r from-sky-700 to-sky-900',
+            text: 'text-sky-100',
+            hover: 'hover:bg-sky-600/50'
+        },
+        chatContainer: {
+            userBg: 'bg-sky-200 dark:bg-sky-700',
+            botBg: 'bg-sky-100 dark:bg-sky-800',
+            gradient: 'bg-gradient-to-br from-sky-50 to-sky-100 dark:from-sky-900 dark:to-sky-950'
+        }
+    }
+};
+
+
 function App() {
     const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([]);
     const [isStreaming, setIsStreaming] = useState(false)
     const [input, setInput] = useState('');
     const [isLoaded, setIsLoaded] = useState(false);
+    const [selectedModel, setSelectedModel] = useState(() =>
+        localStorage.getItem('selectedModel') || 'Daisii'
+    );
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
     const navigate = useNavigate();
 
+    // Save selected model to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('selectedModel', selectedModel);
+    }, [selectedModel]);
+
+    // Add delay animation when page init
     useEffect(() => {
         // Add overflow-hidden to body during initial load
         document.body.style.overflow = 'hidden';
@@ -126,7 +177,6 @@ function App() {
         navigate('/');
     };
 
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -142,7 +192,12 @@ function App() {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ role: "user", content: userInput }),
+                    body: JSON.stringify(
+                        {
+                            role: "user",
+                            content: userInput,
+                            model: selectedModel
+                        }),
                 });
 
                 if (!response.ok) {
@@ -211,6 +266,14 @@ function App() {
         }
     };
 
+    const handleModelChange = (model: string) => {
+        setSelectedModel(model);
+        toast({
+            title: "Model Changed",
+            description: `Switched to talk with ${model.charAt(0).toUpperCase() + model.slice(1)}`,
+        });
+    };
+
     const containerVariants = {
         hidden: { opacity: 0, y: 20 },
         visible: {
@@ -258,6 +321,10 @@ function App() {
         }
     };
 
+
+    const getCurrentModelStyle = () => modelStyles[selectedModel as keyof typeof modelStyles];
+
+
     return (
         <div className="fixed inset-0 overflow-x-hidden main-scrollbar">
             <motion.div
@@ -269,10 +336,34 @@ function App() {
 
                 {/* Small header with logo or Daisii text */}
                 <motion.header
-                    className="flex justify-between items-center p-1 dark:bg-sepia-700 text-center text-xl font-semibold"
+                    className="flex justify-between items-center p-1 dark:bg-sepia-700 "
                     variants={headerVariants}
                 >
-                    <span className="text-sepia-800 dark:text-sepia-200 pl-7p">Daisii</span>
+                    <div className='pl-7p'>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    className="text-sepia-800 dark:text-sepia-200 hover:bg-sepia-300/20"
+                                >
+                                    <span className="text-center text-xl font-semibold text-sepia-800 hover:bg-sepia-300/20">
+                                        {selectedModel}
+                                    </span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => handleModelChange('Daisii')}>
+                                    Daisii
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleModelChange('Claude')}>
+                                    Claude
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleModelChange('Titan')}>
+                                    Titan
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                     <div className="p-2 pr-2p">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
