@@ -109,6 +109,7 @@ const modelStyles = {
         chatContainer: {
             userBg: 'bg-sepia-300 dark:bg-sepia-700',
             botBg: 'bg-sepia-200 dark:bg-sepia-600',
+            text: 'daisii-text'
         },
         chatInput: {
             inputArea: 'bg-sepia-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-sepia-500',
@@ -119,41 +120,45 @@ const modelStyles = {
     },
     Claude: {
         header: {
-            background: 'bg-gradient-to-r from-purple-700 to-purple-900',
+            background: 'bg-claude-background',
             changeModelHover: 'dark:bg-sepia-700',
-            text: 'text-purple-100',
-            hover: 'hover:bg-purple-600/50',
-            menu: 'bg-sepia-300/50 hover:bg-sepia-400/50'
+            text: 'claude-text',
+            hover: 'hover:bg-stone-900/50',
+            menu: 'bg-claude-user bg-claude-user/800 border-transparent claude-text'
         },
         chatContainer: {
-            userBg: 'bg-purple-200 dark:bg-purple-700',
-            botBg: 'bg-purple-100 dark:bg-purple-800',
+            userBg: 'bg-claude-user',
+            botBg: 'bg-claude-bot',
+            text: 'claude-text'
         },
         chatInput: {
             inputArea: 'bg-sepia-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-sepia-500',
-            attachButton: 'bg-sepia-400 hover:bg-sepia-500',
-            button: 'bg-sepia-500 hover:bg-sepia-600',
+            attachButton: 'bg-sepia-100/0 hover:bg-sepia-100/10',
+            button: 'bg-sepia-100/0 hover:bg-sepia-100/10',
         },
-        font: 'font-claude',
+        // font: 'font-claude',
+        font: 'font-daisii'
     },
     Titan: {
         header: {
-            background: 'bg-gradient-to-r from-sky-700 to-sky-900',
-            changeModelHover: 'dark:bg-sepia-700',
-            text: 'text-sky-100',
-            hover: 'hover:bg-sky-600/50',
-            menu: 'bg-sepia-300/50 hover:bg-sepia-400/50'
+            background: 'bg-gradient-to-r from-gray-50 to-gray-100',
+            changeModelHover: 'dark:bg-gray-700',
+            text: 'text-gray-900',
+            hover: 'hover:bg-gray-300/50',
+            menu: 'bg-gray-300/50 hover:bg-gray-400/50'
         },
         chatContainer: {
-            userBg: 'bg-sky-200 dark:bg-sky-700',
-            botBg: 'bg-sky-100 dark:bg-sky-800',
+            userBg: 'bg-gray-300 dark:bg-gray-700',
+            botBg: 'bg-gray-100 dark:bg-gray-800',
+            text: 'text-gray-800 dark:text-gray-200'
         },
         chatInput: {
-            inputArea: 'bg-sepia-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-sepia-500',
-            attachButton: 'bg-sepia-400 hover:bg-sepia-500',
-            button: 'bg-sepia-500 hover:bg-sepia-600',
+            inputArea: 'bg-gray-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-gray-50',
+            attachButton: 'bg-gray-400 hover:bg-gray-500',
+            button: 'bg-gray-500 hover:bg-gray-600',
         },
-        font: 'font-titan',
+        // font: 'font-titan',
+        font: 'font-daisii'
     }
 };
 
@@ -287,7 +292,7 @@ function App() {
     const showHelp = () => {
         toast({
             title: "Help",
-            description: "This is a AI chat application. Type your message and hit enter to chat with Daisii.",
+            description: `This is a AI chat application. Type your message and hit enter to chat with ${selectedModel}.`,
         });
     };
 
@@ -454,8 +459,8 @@ function App() {
                                     <div className={`flex items-start space-x-2 max-w-[95%] ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                                         <div
                                             className={`p-3 rounded-lg w-full ${message.isUser
-                                                ? getCurrentModelStyle().chatContainer.userBg
-                                                : `${modelStyles[message.botType!].chatContainer.botBg}`
+                                                ? `${getCurrentModelStyle().chatContainer.userBg} ${getCurrentModelStyle().chatContainer.text}`
+                                                : `${modelStyles[message.botType!].chatContainer.botBg} ${modelStyles[message.botType!].chatContainer.text}`
                                                 } prose dark:prose-invert`}
                                         >
                                             <div className={`
@@ -509,10 +514,11 @@ function App() {
                         variants={formVariants}
                     >
                         <Textarea
-                            placeholder="Type your message..."
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            className={`${getCurrentModelStyle().chatInput.inputArea} pr-20 min-h-[40px] max-h-[120px] overflow-y-auto resize-none w-full`}
+                            className={`
+                                ${getCurrentModelStyle().chatInput.inputArea} pr-20 min-h-[40px] max-h-[120px] overflow-y-auto resize-none w-full ${getCurrentModelStyle().chatContainer.text}`}
+                            placeholder="Type your message..."
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault();
