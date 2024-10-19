@@ -92,38 +92,56 @@ const CodeBlock = ({ children }: { children: ReactElement }) => {
 const modelStyles = {
     Daisii: {
         header: {
-            background: 'bg-gradient-to-r from-sepia-700 to-sepia-800',
-            text: 'text-sepia-100',
-            hover: 'hover:bg-sepia-600/50'
+            background: 'bg-gradient-to-br from-sepia-100 to-sepia-200 dark:from-sepia-800 dark:to-sepia-900',
+            changeModelHover: 'dark:bg-sepia-700',
+            text: 'text-sepia-800 dark:text-sepia-200',
+            hover: 'hover:bg-sepia-200',
+            menu: 'bg-sepia-300/50 hover:bg-sepia-400/50'
         },
         chatContainer: {
             userBg: 'bg-sepia-300 dark:bg-sepia-700',
             botBg: 'bg-sepia-200 dark:bg-sepia-600',
-            gradient: 'bg-gradient-to-br from-sepia-100 to-sepia-200 dark:from-sepia-800 dark:to-sepia-900'
+        },
+        chatInput: {
+            inputArea: 'bg-sepia-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-sepia-500',
+            attachButton: 'bg-sepia-400 hover:bg-sepia-500',
+            button: 'bg-sepia-500 hover:bg-sepia-600',
         }
     },
     Claude: {
         header: {
             background: 'bg-gradient-to-r from-purple-700 to-purple-900',
+            changeModelHover: 'dark:bg-sepia-700',
             text: 'text-purple-100',
-            hover: 'hover:bg-purple-600/50'
+            hover: 'hover:bg-purple-600/50',
+            menu: 'bg-sepia-300/50 hover:bg-sepia-400/50'
         },
         chatContainer: {
             userBg: 'bg-purple-200 dark:bg-purple-700',
             botBg: 'bg-purple-100 dark:bg-purple-800',
-            gradient: 'bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-950'
+        },
+        chatInput: {
+            inputArea: 'bg-sepia-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-sepia-500',
+            attachButton: 'bg-sepia-400 hover:bg-sepia-500',
+            button: 'bg-sepia-500 hover:bg-sepia-600',
         }
     },
     Titan: {
         header: {
             background: 'bg-gradient-to-r from-sky-700 to-sky-900',
+            changeModelHover: 'dark:bg-sepia-700',
             text: 'text-sky-100',
-            hover: 'hover:bg-sky-600/50'
+            hover: 'hover:bg-sky-600/50',
+            menu: 'bg-sepia-300/50 hover:bg-sepia-400/50'
         },
         chatContainer: {
             userBg: 'bg-sky-200 dark:bg-sky-700',
             botBg: 'bg-sky-100 dark:bg-sky-800',
-            gradient: 'bg-gradient-to-br from-sky-50 to-sky-100 dark:from-sky-900 dark:to-sky-950'
+        },
+        chatInput: {
+            inputArea: 'bg-sepia-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-sepia-500',
+            attachButton: 'bg-sepia-400 hover:bg-sepia-500',
+            button: 'bg-sepia-500 hover:bg-sepia-600',
         }
     }
 };
@@ -328,7 +346,7 @@ function App() {
     return (
         <div className="fixed inset-0 overflow-x-hidden main-scrollbar">
             <motion.div
-                className="flex flex-col h-full bg-gradient-to-br from-sepia-100 to-sepia-200 dark:from-sepia-800 dark:to-sepia-900"
+                className={`flex flex-col h-full ${getCurrentModelStyle().header.background}`}
                 initial="hidden"
                 animate={isLoaded ? "visible" : "hidden"}
                 variants={containerVariants}
@@ -336,7 +354,7 @@ function App() {
 
                 {/* Small header with logo or Daisii text */}
                 <motion.header
-                    className="flex justify-between items-center p-1 dark:bg-sepia-700 "
+                    className={`flex justify-between items-center p-1 ${getCurrentModelStyle().header.changeModelHover}`}
                     variants={headerVariants}
                 >
                     <div className='pl-7p'>
@@ -344,21 +362,24 @@ function App() {
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="ghost"
-                                    className="text-sepia-800 dark:text-sepia-200 hover:bg-sepia-300/20"
+                                    className={`${getCurrentModelStyle().header.text} ${getCurrentModelStyle().header.hover}`}
                                 >
-                                    <span className="text-center text-xl font-semibold text-sepia-800 hover:bg-sepia-300/20">
+                                    <span className={`text-center text-xl font-semibold ${getCurrentModelStyle().header.text}`}>
                                         {selectedModel}
                                     </span>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleModelChange('Daisii')}>
+                                <DropdownMenuItem onClick={() => handleModelChange('Daisii')}
+                                    className="hover:bg-sepia-100">
                                     Daisii
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleModelChange('Claude')}>
+                                <DropdownMenuItem onClick={() => handleModelChange('Claude')}
+                                    className="hover:bg-purple-100">
                                     Claude
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleModelChange('Titan')}>
+                                <DropdownMenuItem onClick={() => handleModelChange('Titan')}
+                                    className="hover:bg-sky-100">
                                     Titan
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -367,7 +388,11 @@ function App() {
                     <div className="p-2 pr-2p">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="bg-sepia-300/50 hover:bg-sepia-400/50">Menu</Button>
+                                <Button
+                                    variant="outline"
+                                    className={getCurrentModelStyle().header.menu}>
+                                    Menu
+                                </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 <DropdownMenuItem onClick={refreshChat}>
@@ -407,7 +432,9 @@ function App() {
                                 >
                                     <div className={`flex items-start space-x-2 max-w-[95%] ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                                         <div
-                                            className={`p-3 rounded-lg w-full ${message.isUser ? 'bg-sepia-300 dark:bg-sepia-700' : 'bg-sepia-200 dark:bg-sepia-600'
+                                            className={`p-3 rounded-lg w-full ${message.isUser
+                                                ? getCurrentModelStyle().chatContainer.userBg
+                                                : getCurrentModelStyle().chatContainer.botBg
                                                 } prose dark:prose-invert`}
                                         >
                                             <div className='
@@ -463,7 +490,7 @@ function App() {
                             placeholder="Type your message..."
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            className="bg-sepia-100/20 backdrop-blur-sm border-none focus:ring-2 focus:ring-sepia-500 pr-20 min-h-[40px] max-h-[120px] overflow-y-auto resize-none w-full"
+                            className={`${getCurrentModelStyle().chatInput.inputArea} pr-20 min-h-[40px] max-h-[120px] overflow-y-auto resize-none w-full`}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault();
@@ -475,7 +502,7 @@ function App() {
                             <Button
                                 type="button"
                                 size="icon"
-                                className="bg-sepia-400 hover:bg-sepia-500 mr-1"
+                                className={`${getCurrentModelStyle().chatInput.attachButton} mr-1`}
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isStreaming}
                             >
@@ -484,7 +511,7 @@ function App() {
                             <Button
                                 type="submit"
                                 size="icon"
-                                className="bg-sepia-500 hover:bg-sepia-600"
+                                className={getCurrentModelStyle().chatInput.button}
                                 disabled={isStreaming}
                             >
                                 <Send className="h-4 w-4" />
@@ -503,7 +530,7 @@ function App() {
 
                 {/* Small footer for disclaimer of Daisii */}
                 <motion.footer
-                    className="p-3 flex justify-center text-sm text-sepia-800 dark:text-sepia-200"
+                    className={`p-3 flex justify-center text-sm ${getCurrentModelStyle().header.text}`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6, duration: 0.5 }}
