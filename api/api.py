@@ -11,7 +11,11 @@ from aws_services.bedrock import BedrockService
 from aws_services.dynamodb import DynamoDBService
 from aws_services.rds import AuroraPostgres
 
-from prompt import INSTRUCTION_VERSION_1, INSTRUCTION_TITAN_VERSION
+from prompt import INSTRUCTION_CLAUDE_VERSION, \
+                INSTRUCTION_DAISII_VERSION, \
+                INSTRUCTION_TITAN_VERSION
+from config import CLAUDE, DAISII, TITAN
+
 
 memory = []
 
@@ -105,65 +109,71 @@ async def chat(request: Request):
         
         # Call Bedrock to get the streaming response
         data = await request.json()
-        prompt = bedrock_service.format_llama_prompt(data["content"], INSTRUCTION_VERSION_1)
-        # memory.append(data)
-        # stream = await bedrock_service.invoke_model_claude(
-            # INSTRUCTION_VERSION_1, 
-            # memory, 
-            # 1024, 
-            # 0, 
-            # 0.99, 
-            # 0
-        # )
-        # stream = await bedrock_service.invoke_model_llama(
-            # prompt, 
-            # 1024, 
-            # 0, 
-            # 0.99
-        # )
-        stream = await bedrock_service.invoke_model_titan(
-            INSTRUCTION_TITAN_VERSION.format(question=data["content"]), 
-            1024, 
-            0, 
-            0.99
-        )
         
-        async def generate():
+        if data["model"] == CLAUDE:
+            memory.append({"role": data["role"], "content": data["content"]})
+            stream = await bedrock_service.invoke_model_claude(
+                INSTRUCTION_CLAUDE_VERSION, 
+                messages=memory, 
+                max_token=1024, 
+                temp=0, 
+                p=0.99, 
+                k=0
+            )
+        elif data["model"] == DAISII:
+            prompt = bedrock_service.format_llama_prompt(
+                data["content"], INSTRUCTION_DAISII_VERSION
+            )
+            stream = await bedrock_service.invoke_model_llama(prompt, 1024, 0, 0.99)
+        elif data["model"] == TITAN:
+            prompt = bedrock_service.format_titan_prompt(
+                data["content"], INSTRUCTION_TITAN_VERSION
+            )
+            stream = await bedrock_service.invoke_model_titan(prompt, 1024, 0, 0.99)
+        else:
+            logging.error(f"Invalid model specified from parameter")
+            raise HTTPException(status_code=400, detail="Invalid model specified")
+        
+        async def generate(model_type):
             full_response = ""
             try:
-                # # Parse Claude stream response
-                # for event in stream:
-                #     chunk = json.loads(event["chunk"]["bytes"])
-                #     if chunk['type'] == 'content_block_delta':
-                #         if chunk['delta']['type'] == 'text_delta':
-                #             text_chunk = chunk['delta']['text']
-                #             yield text_chunk
-                #             full_response+=text_chunk
+                # Parse Claude stream response
+                if model_type == CLAUDE:
+                    for event in stream:
+                        chunk = json.loads(event["chunk"]["bytes"])
+                        if chunk['type'] == 'content_block_delta':
+                            if chunk['delta']['type'] == 'text_delta':
+                                text_chunk = chunk['delta']['text']
+                                yield text_chunk
+                                full_response+=text_chunk
                 
                 # Parse Llama stream response    
-                # for event in stream:
-                #     chunk = json.loads(event["chunk"]["bytes"])
-                #     text = chunk["generation"]
-                #     yield text
-                #     full_response += text
+                elif model_type == DAISII:
+                    for event in stream:
+                        chunk = json.loads(event["chunk"]["bytes"])
+                        text = chunk["generation"]
+                        yield text
+                        full_response += text
                 
                 # Parse Titan stream response
-                for event in stream:
-                    chunk = json.loads(event["chunk"]["bytes"])
-                    text = chunk["outputText"]
-                    yield text
-                    full_response += text
+                else:
+                    for event in stream:
+                        chunk = json.loads(event["chunk"]["bytes"])
+                        text = chunk["outputText"]
+                        yield text
+                        full_response += text
                             
             except Exception as e:
                 logging.error(f"Error while streaming response: {str(e)}")
                 raise HTTPException(status_code=500, detail="Error while streaming response")
             
             # Save the updated chat history
-            # memory.append({"role": "assistant", "content": full_response})
+            if model_type == CLAUDE:
+                memory.append({"role": "assistant", "content": full_response})
             # chat_history.append({"role": "assistant", "content": full_response})
             # await dynamodb_service.save_chat_history(conversation_id, chat_history)
 
-        return StreamingResponse(generate(), media_type="text/markdown")
+        return StreamingResponse(generate(data["model"]), media_type="text/markdown")
     except Exception as e:
         logging.error(f"Error in chat endpoint: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")

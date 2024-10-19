@@ -75,3 +75,9 @@ class BedrockService:
         <|eot_id|><|start_header_id|>user<|end_header_id|>
         
         {user_message}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
+
+    
+    def format_titan_prompt(self, user_message, instruction):
+        return f"""{instruction}
+        User: {user_message}
+        Assistant:"""
