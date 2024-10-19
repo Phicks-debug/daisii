@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
@@ -16,19 +16,20 @@ import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
-const CodeBlock = ({ children }: { children: string }) => {
+const CodeBlock = ({ children }: { children: ReactElement }) => {
     const [isCopied, setIsCopied] = useState(false);
     const { toast } = useToast();
 
     const handleCopy = async () => {
         try {
-            await navigator.clipboard.writeText(children);
+            await navigator.clipboard.writeText(children["props"]["children"]);
+            console.log(children);
             setIsCopied(true);
             toast({
                 title: "Copied!",
                 description: "Code copied to clipboard",
             });
-            setTimeout(() => setIsCopied(false), 2000);
+            setTimeout(() => setIsCopied(false), 10000);
         } catch (err) {
             toast({
                 title: "Failed to copy",
@@ -39,38 +40,49 @@ const CodeBlock = ({ children }: { children: string }) => {
     };
 
     return (
-        <div className="relative group">
-            <Button
-                size="icon"
-                variant="outline"
-                className="absolute right-2 top-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity bg-sepia-200/80 dark:bg-sepia-700/80 hover:bg-sepia-300 dark:hover:bg-sepia-600"
-                onClick={handleCopy}
-            >
-                <AnimatePresence mode="wait" initial={false}>
-                    {isCopied ? (
-                        <motion.div
-                            key="check"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0 }}
-                            className="h-4 w-4 text-green-500"
-                        >
-                            <Check className="h-4 w-4" />
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="copy"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0 }}
-                        >
-                            <Copy className="h-4 w-4" />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </Button>
-            <code>{children}</code>
-        </div>
+        <pre className='relative bg-sepia-700/10 p-2 rounded overflow-visible'>
+            <div className="relative group">
+                <div className="sticky top-0 float-right -mr-1 -mt-1 ml-2 z-10">
+                    <Button
+                        size="icon"
+                        variant="outline"
+                        className="absolute right-2 top-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity bg-sepia-200/80 dark:bg-sepia-700/80 hover:bg-sepia-300 dark:hover:bg-sepia-600"
+                        onClick={handleCopy}
+                    >
+                        <AnimatePresence mode="wait" initial={false}>
+                            {isCopied ? (
+                                <motion.div
+                                    key="check"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    exit={{ scale: 0 }}
+                                    className="h-4 w-4 text-green-500"
+                                >
+                                    <Check className="h-4 w-4" />
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="copy"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    exit={{ scale: 0 }}
+                                >
+                                    <Copy className="h-4 w-4" />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </Button>
+                </div>
+                <code className="
+                    block overflow-x-auto pb-2
+                    scrollbar scrollbar-w-2 scrollbar-h-2
+                    scrollbar-thumb-[#D2B48C] hover::scrollbar-thumb-[#B8860B]
+                    scrollbar-track-transparent hover::scrollbar-track-sepia-200/20
+                ">
+                    {children}
+                </code>
+            </div>
+        </pre>
     );
 };
 
@@ -317,12 +329,7 @@ function App() {
                                                 [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-2 [&>h3]:mt-2
                                                 [&>p]:mb-0
                                                 [&>blockquote]:border-l-4 [&>blockquote]:border-sepia-500 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-2
-                                                [&>pre]:relative [&>pre]:bg-sepia-700/10 [&>pre]:p-2 [&>pre]:rounded [&>pre]:overflow-visible
-                                                [&>pre>code]:block [&>pre>code]:overflow-x-auto 
-                                                [&>pre>code]:pb-2
-                                                [&>pre>code]:scrollbar [&>pre>code]:scrollbar-w-2 [&>pre>code]:scrollbar-h-2
-                                                [&>pre>code]:scrollbar-thumb-[#D2B48C] hover:[&>pre>code]:scrollbar-thumb-[#B8860B]
-                                                [&>pre>code]:scrollbar-track-transparent hover:[&>pre>code]:scrollbar-track-sepia-200/20
+                                                
                                                 [&>table]:min-w-full [&>table]:border-collapse [&>table]:my-4
                                                 [&>table]:font-mono [&>table]:relative
                                                 [&>table>thead]:bg-sepia-200/50 dark:[&>table>thead]:bg-sepia-600/30
@@ -343,7 +350,7 @@ function App() {
                                                 <ReactMarkdown
                                                     remarkPlugins={[remarkGfm]}
                                                     components={{
-                                                        code: ({ children }) => <CodeBlock>{children as string}</CodeBlock>,
+                                                        pre: ({ children }) => <CodeBlock>{children as ReactElement}</CodeBlock>,
                                                     }}
                                                 >
                                                     {message.text}
