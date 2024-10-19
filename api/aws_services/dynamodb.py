@@ -1,13 +1,15 @@
 import boto3
 from boto3.dynamodb.conditions import Key
 
+
 class DynamoDBService:
     def __init__(self, region_name: str, table: str):
         self.dynamodb = boto3.resource('dynamodb', region_name=region_name)
         self.table_name = table
         self.table = self.dynamodb.Table(table)
 
-    async def create_table(self, conversation_id):
+
+    def create_table(self, conversation_id):
         table_name = f"{self.table_name}_{conversation_id}"
         try:
             table = self.dynamodb.create_table(
@@ -35,16 +37,26 @@ class DynamoDBService:
             # If the table already exists, just use it
             self.table = self.dynamodb.Table(table_name)
 
-    async def get_chat_history(self, conversation_id):
+
+    def get_chat_history(self, conversation_id):
         response = self.table.query(
             KeyConditionExpression=Key('conversation_id').eq(conversation_id)
         )
         return response.get('Items', [])
 
-    async def save_chat_history(self, conversation_id, messages):
+
+    def save_chat_history(self, conversation_id, messages):
         self.table.put_item(
             Item={
                 'conversation_id': conversation_id,
                 'messages': messages
             }
         )
+        
+    
+if __name__ == "__main__":
+    dynamodb_service = DynamoDBService("us-east-1", "daisy-chat-history")
+    # conversation_id = uuid.uuid4().hex
+    # dynamodb_service.create_table(conversation_id)
+    dynamodb_service.save_chat_history("e34509c50d3d421990aa861b52c0881d", [{"role": "user", "content": "What is your name?"}])
+    print(dynamodb_service.get_chat_history("e34509c50d3d421990aa861b52c0881d"))
