@@ -6,11 +6,14 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+
 from aws_services.bedrock import BedrockService
 from aws_services.dynamodb import DynamoDBService
 from aws_services.rds import AuroraPostgres
-from prompt import INSTRUCTION_VERSION_1
 
+from prompt import INSTRUCTION_VERSION_1, INSTRUCTION_TITAN_VERSION
+
+memory = []
 
 load_dotenv()
 
@@ -104,12 +107,31 @@ async def chat(request: Request):
         data = await request.json()
         prompt = bedrock_service.format_llama_prompt(data["content"], INSTRUCTION_VERSION_1)
         # memory.append(data)
-        # stream = await bedrock_service.invoke_model_claude(instruction, memory, 1024, 0, 0.99, 0)
-        stream = await bedrock_service.invoke_model_llama(prompt, 1024, 0, 0.99)
+        # stream = await bedrock_service.invoke_model_claude(
+            # INSTRUCTION_VERSION_1, 
+            # memory, 
+            # 1024, 
+            # 0, 
+            # 0.99, 
+            # 0
+        # )
+        # stream = await bedrock_service.invoke_model_llama(
+            # prompt, 
+            # 1024, 
+            # 0, 
+            # 0.99
+        # )
+        stream = await bedrock_service.invoke_model_titan(
+            INSTRUCTION_TITAN_VERSION.format(question=data["content"]), 
+            1024, 
+            0, 
+            0.99
+        )
         
         async def generate():
             full_response = ""
             try:
+                # # Parse Claude stream response
                 # for event in stream:
                 #     chunk = json.loads(event["chunk"]["bytes"])
                 #     if chunk['type'] == 'content_block_delta':
@@ -117,10 +139,18 @@ async def chat(request: Request):
                 #             text_chunk = chunk['delta']['text']
                 #             yield text_chunk
                 #             full_response+=text_chunk
-                            
+                
+                # Parse Llama stream response    
+                # for event in stream:
+                #     chunk = json.loads(event["chunk"]["bytes"])
+                #     text = chunk["generation"]
+                #     yield text
+                #     full_response += text
+                
+                # Parse Titan stream response
                 for event in stream:
                     chunk = json.loads(event["chunk"]["bytes"])
-                    text = chunk["generation"]
+                    text = chunk["outputText"]
                     yield text
                     full_response += text
                             

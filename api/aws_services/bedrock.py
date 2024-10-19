@@ -1,6 +1,9 @@
 import boto3
 import json
 
+from typing import Any
+
+
 class BedrockService:
     def __init__(self, region_name: str):
         self.bedrock_runtime = boto3.client('bedrock-runtime', region_name=region_name)
@@ -45,10 +48,30 @@ class BedrockService:
         return response['body']
     
     
+    async def invoke_model_titan(self, instruction, max_token, temp, p):
+        body = json.dumps({
+            "inputText": instruction,
+            "textGenerationConfig": {
+                "maxTokenCount": max_token,
+                "temperature": temp,
+                "topP": p,
+                "stopSequences": ["User:"]
+            }
+        })
+
+        response = self.bedrock_runtime.invoke_model_with_response_stream(
+            modelId="amazon.titan-text-premier-v1:0",
+            accept="application/json",
+            contentType="application/json",
+            body=body,
+        )
+
+        return response['body']
+    
+    
     def format_llama_prompt(self, user_message, instruction):
         return f""""<|start_header_id|>system<|end_header_id|>
         {instruction}
         <|eot_id|><|start_header_id|>user<|end_header_id|>
         
         {user_message}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
-        
