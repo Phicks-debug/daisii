@@ -38,16 +38,17 @@ class DynamoDBService:
             self.table = self.dynamodb.Table(table_name)
 
 
-    def get_chat_history(self, conversation_id):
+    def get_chat_history(self, userid, conversation_id):
         response = self.table.query(
             KeyConditionExpression=Key('conversation_id').eq(conversation_id)
         )
         return response.get('Items', [])
 
 
-    def save_chat_history(self, conversation_id, messages):
-        self.table.put_item(
+    async def save_chat_history(self, conversation_id, userid, messages):
+        result = self.table.put_item(
             Item={
+                'userid': userid,
                 'conversation_id': conversation_id,
                 'messages': messages
             }

@@ -2,7 +2,6 @@ import boto3
 import os
 import logging
 
-from dotenv import load_dotenv
 from botocore.exceptions import ClientError
 
 
@@ -26,7 +25,8 @@ class AuroraPostgres:
                 userID uuid DEFAULT uuid_generate_v4(),
                 email VARCHAR(255) UNIQUE,
                 username VARCHAR(255),
-                password VARCHAR(255)
+                password VARCHAR(255),
+                disabled BOOLEAN DEFAULT FALSE
             );
         """
         
@@ -79,13 +79,13 @@ class AuroraPostgres:
         return {"status": "Success", "message": result}
 
 
-    async def get_user(self, email: str, password: str):
+    async def get_user(self, email: str):
         """
         Get user from the Aurora PostgreSQL database.
         """
 
         select_sql = """
-            SELECT * FROM users WHERE email = :email AND password = :password
+            SELECT * FROM users WHERE email = :email
         """
 
         try:
@@ -95,13 +95,12 @@ class AuroraPostgres:
                 resourceArn=os.environ.get('AURORA_DATABASE_RESOURCE_ARN'),
                 sql=select_sql,
                 parameters=[
-                    {'name': 'email', 'value': {'stringValue': email}},
-                    {'name': 'password', 'value': {'stringValue': password}}
+                    {'name': 'email', 'value': {'stringValue': email}}
                 ]
             )
             
             # Assuming `records` is part of the result structure that returns the data.
-            return {"status": "Success", "message": result['records'][0]}
+            return {"status": "Success", "message": result['records']}
 
         except ClientError as e:
             logging.error(e)

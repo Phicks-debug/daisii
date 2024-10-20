@@ -69,15 +69,15 @@ class BedrockService:
         return response['body']
     
     
-    def format_llama_prompt(self, user_message, instruction):
+    def format_llama_prompt(self, user_messages, instruction):
         return f""""<|start_header_id|>system<|end_header_id|>
         {instruction}
         <|eot_id|><|start_header_id|>user<|end_header_id|>
         
-        {user_message}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
+        {user_messages}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
 
     
-    def format_titan_prompt(self, user_message, instruction):
+    def format_titan_prompt(self, user_messages, instruction):
         return f"""{instruction}
-        User: {user_message}
-        Assistant:"""
+        {user_messages}
+        """
