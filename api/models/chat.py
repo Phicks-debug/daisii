@@ -1,12 +1,56 @@
-from pydantic import BaseModel
-from typing import List
+from enum import Enum
+from typing import List, Dict
 from fastapi import BackgroundTasks
+from pydantic import BaseModel
 
 
-# New Pydantic models for better type handling
+class MediaType(str, Enum):
+    JPEG = "image/jpeg"
+    PNG = "image/png"
+    GIF = "image/gif"
+    WEBP = "image/webp"
+
+
+class ContentType(str, Enum):
+    TEXT = "text"
+    IMAGE = "image"
+    TOOLUSE = "tool_use"
+    TOOLRESULT = "tool_result"
+    
+
+class Image(BaseModel):
+    type = "base64"
+    media_type: MediaType
+    data: str
+    
+    
+class TextContent(BaseModel):
+    type: ContentType.TEXT
+    text: str
+    
+
+class ImageContent(BaseModel):
+    type: ContentType.IMAGE
+    source: Image
+    
+    
+class ToolUseContent(BaseModel):
+    type: ContentType.TOOLUSE
+    tool_use_id: str
+    tool_name: str
+    input: Dict
+    
+
+class ToolResultContent(BaseModel):
+    type: ContentType.TOOLRESULT
+    tool_use_id: str
+    is_error: bool
+    content: List[TextContent | ImageContent] | str
+
+
 class ChatMessage(BaseModel):
     role: str
-    content: str
+    content: List[TextContent | ImageContent | ToolUseContent | ToolResultContent] | str
 
 
 class ChatHistory(BaseModel):
