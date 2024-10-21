@@ -261,6 +261,8 @@ async def chat(
     user: UserInDB = Depends(get_current_active_user)
 ):
     try:
+        messages = eval(messages.model_dump_json())
+        
         if model == CLAUDE:
             stream = await bedrock_service.invoke_model_claude(
                 INSTRUCTION_CLAUDE_VERSION, 
